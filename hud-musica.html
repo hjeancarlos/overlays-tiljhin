@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>HUD · Música e redes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Carlito:wght@400;700&display=swap">
+<style>
+/* Plaquinha de música e redes do HUD — TIL JHIN
+   Fonte do OBS separada (o StreamElements não consegue ler o SMTC-Bridge).
+   Fica EM CIMA do HUD, encaixada nele: as duas formam uma caixa só.
+   Mesmo visual do HUD: metal escuro > linha na cor do jogo > miolo preto. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
+:root{--acc:#e0202a;--w:250px;--h:84px;--top:40px;--right:26px;--pad:12px;--orn:70px;--crest:150px}
+
+#pl{position:absolute;top:var(--top);right:var(--right);width:var(--w);height:var(--h);font-family:'Carlito',sans-serif;color:#f3e9e4;
+  filter:drop-shadow(0 0 7px color-mix(in srgb,var(--acc) 55%,transparent)) drop-shadow(0 6px 12px rgba(0,0,0,.7))}
+.panel{position:absolute;inset:0;background:linear-gradient(180deg,#3b1d1f 0%,#1b0d0e 45%,#2c1517 100%)}
+.panel::before{content:"";position:absolute;inset:3px;background:var(--acc)}
+.panel::after{content:"";position:absolute;inset:4px;background:radial-gradient(120% 90% at 50% 0%,#140a0b 0%,#080506 70%);box-shadow:inset 0 0 18px rgba(0,0,0,.9),inset 0 0 6px color-mix(in srgb,var(--acc) 35%,transparent)}
+
+/* as duas faixas ocupam o mesmo lugar e trocam com fade (--pad = espaço do brasão em cima) */
+.faixa{position:absolute;inset:calc(4px + var(--pad)) 4px 4px;z-index:1;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease}
+.faixa.on{opacity:1;transform:none}
+
+/* MÚSICA */
+.np-row{display:flex;align-items:center;gap:9px;padding:0 10px}
+.np-art{flex-shrink:0;width:38px;height:38px;padding:2px;background:linear-gradient(180deg,#3b1d1f,#1b0d0e);border:1px solid color-mix(in srgb,var(--acc) 70%,#000);box-shadow:0 0 6px color-mix(in srgb,var(--acc) 40%,transparent)}
+.np-art img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.85) contrast(1.05)}
+.np-txt{flex:1;min-width:0;line-height:1.15}
+.np-title{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000}
+.np-artist{font-size:12px;opacity:.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-eq{display:flex;align-items:flex-end;gap:2px;height:14px;flex-shrink:0}
+.np-eq span{width:3px;height:100%;background:var(--acc);box-shadow:0 0 4px var(--acc);transform-origin:bottom;animation:eq 1s ease-in-out infinite}
+.np-eq span:nth-child(2){animation-duration:.8s;animation-delay:-.3s}
+.np-eq span:nth-child(3){animation-duration:1.15s;animation-delay:-.6s}
+.np-eq span:nth-child(4){animation-duration:.9s;animation-delay:-.15s}
+.np-bar{height:3px;margin:6px 10px 0;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden}
+.np-fill{height:100%;width:0%;background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 50%,#000),var(--acc));box-shadow:0 0 6px var(--acc);transition:width .5s linear}
+.troca .np-art{animation:npTroca .7s ease-out}
+
+/* REDES */
+.rd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px}
+.rd-txt{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.rd-lbl{font-weight:700;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;opacity:.65;white-space:nowrap}
+.rd-lbl:empty{display:none}
+.rd-at{margin-top:3px;font-weight:700;font-size:17px;letter-spacing:.5px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000,0 0 8px color-mix(in srgb,var(--acc) 55%,transparent)}
+.rd-at b{color:var(--acc)}
+.rd-ico{display:flex;gap:4px;flex-shrink:0}
+.rd-ico svg{width:19px;height:19px;fill:#f3e9e4;filter:drop-shadow(0 1px 1px #000) drop-shadow(0 0 4px color-mix(in srgb,var(--acc) 85%,transparent))}
+.entra .rd-ico svg{animation:rdPop .5s cubic-bezier(.2,.9,.3,1.3) .2s backwards}
+.entra .rd-ico svg:nth-child(2){animation-delay:.3s}
+.entra .rd-ico svg:nth-child(3){animation-delay:.4s}
+.entra .rd-ico svg:nth-child(4){animation-delay:.5s}
+
+/* ORNAMENTOS (os mesmos que ficavam no topo do HUD) */
+.orn{position:absolute;z-index:3;pointer-events:none}
+.orn-tl,.orn-tr{width:var(--orn);top:calc(var(--orn) * -0.13)}
+.orn-tl{left:calc(var(--orn) * -0.14)}
+.orn-tr{right:calc(var(--orn) * -0.14);transform:scaleX(-1)}
+.orn-crest{width:var(--crest);left:50%;top:0;transform:translate(-50%,-55%)}
+.modo-heroi .orn{filter:hue-rotate(265deg) saturate(1.3) brightness(1.15)}
+
+.hidden{display:none!important}
+@keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
+@keyframes rdPop{0%{opacity:0;transform:scale(.3) translateY(6px)}100%{opacity:1;transform:none}}
+@keyframes npTroca{0%{transform:scale(.8);filter:brightness(2)}100%{transform:scale(1);filter:brightness(1)}}
+</style>
+</head>
+<body>
+<div id="pl">
+  <div class="panel"></div>
+
+  <div id="np" class="faixa">
+    <div class="np-row">
+      <div class="np-art"><img id="npArt" alt=""></div>
+      <div class="np-txt">
+        <div id="npTitle" class="np-title"></div>
+        <div id="npArtist" class="np-artist"></div>
+      </div>
+      <div class="np-eq"><span></span><span></span><span></span><span></span></div>
+    </div>
+    <div class="np-bar"><div id="npFill" class="np-fill"></div></div>
+  </div>
+
+  <div id="rd" class="faixa">
+    <div class="rd-row">
+      <div class="rd-txt">
+        <span id="rdLbl" class="rd-lbl"></span>
+        <span id="rdAt" class="rd-at"></span>
+      </div>
+      <div id="rdIco" class="rd-ico"></div>
+    </div>
+  </div>
+
+  <img id="ornTL" class="orn orn-tl hidden" alt="">
+  <img id="ornTR" class="orn orn-tr hidden" alt="">
+  <img id="ornCrest" class="orn orn-crest hidden" alt="">
+</div>
+
+<script>
+/* ===================================================
+   ⚙️ CONFIGURAÇÕES — PODE MEXER AQUI
+   Regras: mude só o que está entre aspas '' ou os números.
+   Não apague vírgulas, ponto e vírgula ou aspas.
+   =================================================== */
+
+// Posição e tamanho na tela (px), com a fonte do OBS em 1920x1080
+// Fica EM CIMA do HUD. Mudou ALTURA ou POS_TOPO? No HUD, POS_TOPO = POS_TOPO daqui + ALTURA + 4
+const LARGURA     = 250;  // igual à LARGURA do HUD
+const ALTURA      = 84;
+const POS_TOPO    = 40;   // 40 deixa espaço para o brasão
+const POS_DIREITA = 26;   // igual à POS_DIREITA do HUD
+const ESPACO_BRASAO = 12; // espaço em cima, para o brasão não cobrir o nome da música
+
+// Cores de cada jogo (iguais às do HUD)
+const COR_DBD  = '#e0202a';
+const COR_OVER = '#8B3DFF';
+
+// Ornamentos: as mesmas imagens que estavam no HUD, salvas no GitHub junto desta página
+// (nome do arquivo no repositório, ou um link completo) · '' = sem ornamento
+const ORN_BRASAO = 'fila_brasao.png';
+const ORN_CANTO  = 'fila_canto.png';
+const BRASAO_LARGURA = 150;
+
+// Música (SMTC-Bridge do Nutty, no PC streamer)
+const BRIDGE_URL = 'http://127.0.0.1:5000/now-playing';
+const BRIDGE_APP = 'spotify';  // só mostra música deste app · '' = qualquer app tocando
+const BRIDGE_SEG = 2;          // pergunta ao Bridge a cada X segundos
+
+// Redes sociais
+const REDES_ARROBA = '@tiljhin';
+const REDES_TEXTO  = 'Me segue em todas';               // '' esconde
+const REDES        = ['youtube', 'kick', 'tiktok', 'twitch'];
+const SEG_MUSICA   = 40;  // com música: música na tela por X s...
+const SEG_REDES    = 12;  // ...e depois as redes por Y s, e repete
+
+// Cor do jogo: escuta o chat da Twitch (só você e os mods), os mesmos comandos do HUD
+const CANAL_TWITCH = 'tiljhin';  // '' = não escuta o chat e fica sempre na cor do DBD
+const CMD_DBD      = '!ctadbd';
+const CMD_OVER     = '!ctaover';
+
+/* =================================================== */
+
+const $ = id => document.getElementById(id);
+const norm = s => (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+const num = (v, d) => { const n = parseFloat(v); return isNaN(n) ? d : n; };
+const html = s => (s || '').toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const TESTE = new URLSearchParams(location.search).has('teste');  // ?teste mostra uma música de mentira
+
+/* ---------- POSIÇÃO E ORNAMENTOS ---------- */
+const r = document.documentElement.style;
+r.setProperty('--w', LARGURA + 'px');
+r.setProperty('--h', ALTURA + 'px');
+r.setProperty('--top', POS_TOPO + 'px');
+r.setProperty('--right', POS_DIREITA + 'px');
+r.setProperty('--pad', ESPACO_BRASAO + 'px');
+r.setProperty('--crest', BRASAO_LARGURA + 'px');
+[['ornTL', ORN_CANTO], ['ornTR', ORN_CANTO], ['ornCrest', ORN_BRASAO]].forEach(([id, src]) => {
+  if (!src) return;
+  const img = $(id);
+  img.onerror = () => img.classList.add('hidden');  // imagem não achada: some, sem ícone quebrado
+  img.onload = () => img.classList.remove('hidden');
+  img.src = src;
+});
+
+/* ---------- COR DO JOGO ---------- */
+let modo = 'killer';
+try { modo = localStorage.getItem('hudMusicaModo') || 'killer'; } catch (e) {}
+function setModo(m) {
+  modo = m;
+  try { localStorage.setItem('hudMusicaModo', m); } catch (e) {}
+  r.setProperty('--acc', m === 'heroi' ? COR_OVER : COR_DBD);
+  $('pl').classList.toggle('modo-heroi', m === 'heroi');
+}
+setModo(modo);
+
+// leitura anônima do chat da Twitch, só para os comandos de cor
+function conectarChat() {
+  if (!CANAL_TWITCH) return;
+  const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+  ws.onopen = () => {
+    ws.send('CAP REQ :twitch.tv/tags');
+    ws.send('PASS SCHMOOPIIE');
+    ws.send('NICK justinfan' + Math.floor(10000 + Math.random() * 80000));
+    ws.send('JOIN #' + CANAL_TWITCH.toLowerCase());
+  };
+  ws.onmessage = e => {
+    String(e.data).split('\r\n').forEach(linha => {
+      if (linha.startsWith('PING')) return ws.send('PONG :tmi.twitch.tv');
+      const m = linha.match(/^@(\S+) :\S+ PRIVMSG #\S+ :(.*)$/);
+      if (!m) return;
+      const tags = m[1];
+      const staff = /badges=[^;]*(broadcaster|moderator)/.test(tags) || /(^|;)mod=1(;|$)/.test(tags);
+      if (!staff) return;
+      const cmd = norm(m[2]).split(/\s+/)[0];
+      if (cmd === norm(CMD_DBD)) setModo('killer');
+      if (cmd === norm(CMD_OVER)) setModo('heroi');
+    });
+  };
+  ws.onclose = () => setTimeout(conectarChat, 5000);
+}
+conectarChat();
+
+/* ---------- MÚSICA TOCANDO (SMTC-Bridge) ---------- */
+const NP = { titulo: '', artista: '', pos: 0, fim: 0, em: 0, tocando: false, falhas: 0 };
+const PLAYING = 4; // status "tocando" do Windows
+
+async function lerMusica() {
+  if (TESTE) return;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 1500);
+    const resp = await fetch(String(BRIDGE_URL).trim(), { cache: 'no-store', signal: ctrl.signal });
+    clearTimeout(t);
+    const data = await resp.json();
+    NP.falhas = 0;
+    aplicarMusica(data);
+  } catch (e) {
+    // Bridge fechado ou sem resposta: some depois de 2 falhas seguidas
+    if (++NP.falhas >= 2) NP.tocando = false;
+  }
+}
+
+function escolherSessao(data) {
+  const lista = (data && data.sessions) || [];
+  const filtro = norm(BRIDGE_APP);
+  const daApp = s => !filtro || norm(s.source_app_id).includes(filtro);
+  return lista.find(s => s.source_app_id === data.current_session_id && daApp(s))
+      || lista.find(s => daApp(s) && s.playback_info && s.playback_info.PlaybackStatus === PLAYING)
+      || null;
+}
+
+function aplicarMusica(data) {
+  const s = escolherSessao(data);
+  if (!s) { NP.tocando = false; return; }
+
+  const mp = s.media_properties || {};
+  const pb = s.playback_info || {};
+  const tl = s.timeline_properties || {};
+  const titulo = mp.Title || '';
+  const artista = mp.Artist || mp.AlbumArtist || '';
+  if (!titulo || pb.PlaybackStatus !== PLAYING) { NP.tocando = false; return; }
+
+  // música nova: troca texto e capa
+  if (titulo !== NP.titulo || artista !== NP.artista) {
+    NP.titulo = titulo;
+    NP.artista = artista;
+    $('npTitle').textContent = titulo;
+    $('npArtist').textContent = artista;
+    const img = $('npArt');
+    if (mp.Thumbnail) { img.src = mp.Thumbnail; img.parentElement.classList.remove('hidden'); }
+    else img.parentElement.classList.add('hidden');
+    const np = $('np');
+    np.classList.remove('troca'); void np.offsetWidth; np.classList.add('troca');
+  }
+
+  // posição: o Bridge manda a posição + a hora em que ela foi medida
+  NP.fim = num(tl.EndTime, 0);
+  NP.pos = num(tl.Position, 0);
+  NP.em = Date.now();
+  if (tl.LastUpdatedTime) {
+    const t = Date.parse(String(tl.LastUpdatedTime).replace(' ', 'T').replace(/\.(\d{3})\d*/, '.$1'));
+    if (!isNaN(t) && t <= Date.now() && Date.now() - t < 6 * 3600000) NP.em = t;
+  }
+  NP.tocando = true;
+}
+
+function progressoMusica() {
+  if (!NP.tocando || !NP.fim) { $('npFill').style.width = '0%'; return; }
+  const pos = Math.min(NP.fim, NP.pos + (Date.now() - NP.em));
+  $('npFill').style.width = (pos / NP.fim * 100).toFixed(2) + '%';
+}
+
+/* ---------- REDES ---------- */
+const ICONES = {
+  twitch: '<svg viewBox="0 0 24 24"><path d="M5 2 3 6v14h5v3h3l3-3h4l4-4V2H5zm15 12-3 3h-4l-3 3v-3H6V4h14v10zM16 7h-2v5h2V7zm-5 0H9v5h2V7z"/></svg>',
+  youtube: '<svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2C2 8.8 2 12 2 12s0 3.2.4 4.8a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8c.4-1.6.4-4.8.4-4.8s0-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/></svg>',
+  kick: '<svg viewBox="0 0 24 24"><path d="M3 3h6v6h2V7h2V3h6v6h-2v2h-2v2h2v2h2v6h-6v-4h-2v-2H9v6H3z"/></svg>',
+  tiktok: '<svg viewBox="0 0 24 24"><path d="M16.6 2c.4 2.4 1.9 3.9 4.4 4.1v3.3c-1.7 0-3.2-.5-4.4-1.4v6.7c0 3.4-2.7 6.1-6.1 6.1S4.4 18.1 4.4 14.8c0-3.5 2.9-6.2 6.5-6v3.4c-1.6-.3-3.1.9-3.1 2.6 0 1.5 1.2 2.7 2.7 2.7 1.6 0 2.7-1.2 2.7-2.8V2h3.4z"/></svg>'
+};
+$('rdAt').innerHTML = '<b>@</b>' + html(String(REDES_ARROBA).trim().replace(/^@?/, ''));
+$('rdLbl').textContent = REDES_TEXTO;
+$('rdIco').innerHTML = REDES.map(k => ICONES[String(k).toLowerCase().trim()] || '').join('');
+
+/* ---------- REVEZAMENTO: música 40 s, redes 12 s ---------- */
+let redesOn = null;
+function atualizar() {
+  let mostraRedes = true;
+  if (NP.tocando) {
+    const a = Math.max(5, num(SEG_MUSICA, 40));
+    const b = Math.max(3, num(SEG_REDES, 12));
+    mostraRedes = Math.floor(Date.now() / 1000) % (a + b) >= a;
+  }
+  $('np').classList.toggle('on', !mostraRedes);
+  if (mostraRedes !== redesOn) {
+    redesOn = mostraRedes;
+    const rd = $('rd');
+    rd.classList.toggle('on', mostraRedes);
+    rd.classList.remove('entra');
+    if (mostraRedes) { void rd.offsetWidth; rd.classList.add('entra'); }
+  }
+}
+
+/* ---------- MODO TESTE (?teste no fim do link) ---------- */
+if (TESTE) {
+  aplicarMusica({ current_session_id: 'Spotify.Teste', sessions: [{ source_app_id: 'Spotify.Teste',
+    media_properties: { Title: 'Música de Teste dos Bigodinhos', Artist: 'TIL JHIN' },
+    playback_info: { PlaybackStatus: PLAYING },
+    timeline_properties: { Position: 40000, EndTime: 200000 } }] });
+}
+
+lerMusica();
+setInterval(lerMusica, Math.max(1, num(BRIDGE_SEG, 2)) * 1000);
+setInterval(progressoMusica, 500);
+setInterval(atualizar, 1000);
+atualizar();
+</script>
+</body>
+</html>
