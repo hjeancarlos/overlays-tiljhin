@@ -11,19 +11,19 @@
    Cinzel = rótulos · Montserrat = texto. */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
-:root{--fogo:#E8502A;--w:250px;--h:84px;--top:40px;--right:26px;--pad:10px;--crest:124px;--c:31px;
+:root{--fogo:#E8502A;--w:250px;--h:88px;--top:40px;--right:26px;--pad:10px;--crest:124px;--c:20px;
   --cv:#0B0604;--vb:#670600;--lv:#E3502A;--ou:#E3A059;--cr:#F7C57B;--cl:#FBD491;--ts:#B8A598}
 
-#pl{position:absolute;top:var(--top);right:var(--right);width:var(--w);height:var(--h);font-family:'Montserrat',sans-serif;font-weight:500;color:var(--cr);
+#pl{clip-path:inset(-60px -60px 0 -60px);position:absolute;top:var(--top);right:var(--right);width:var(--w);height:var(--h);font-family:'Montserrat',sans-serif;font-weight:500;color:var(--cr);
   filter:drop-shadow(0 0 6px color-mix(in srgb,var(--fogo) 40%,transparent)) drop-shadow(0 8px 14px rgba(0,0,0,.7))}
 
 /* MOLDURA: a arte estica; o brilho de lava pulsa devagar por dentro */
-.moldura{position:absolute;inset:0;pointer-events:none;border:var(--c) solid transparent;border-image:url("forja_placa.webp") 92 fill / var(--c) stretch}
+.moldura{position:absolute;inset:0;pointer-events:none;border:var(--c) solid transparent;border-width:var(--c) var(--c) 0;border-image:url("forja_placa.webp") 92 fill / var(--c) var(--c) 0 stretch}
 .lava{position:absolute;inset:12px;pointer-events:none;mix-blend-mode:screen;opacity:0;
   background:radial-gradient(90% 130% at 50% 110%,rgba(232,80,42,.38),transparent 70%);animation:pulso 4.2s ease-in-out infinite}
 
 /* as duas faixas ocupam o mesmo lugar e trocam com fade (--pad = espaço da coroa em cima) */
-.faixa{position:absolute;inset:calc(14px + var(--pad)) 20px 12px;z-index:1;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease}
+.faixa{position:absolute;inset:calc(10px + var(--pad)) 14px 4px;z-index:1;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease}
 .faixa.on{opacity:1;transform:none}
 
 /* MÚSICA */
