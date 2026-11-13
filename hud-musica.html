@@ -5,50 +5,50 @@
 <title>HUD · Música e redes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@500;700;800&display=swap">
 <style>
-/* Plaquinha de música e redes do HUD — TIL JHIN · Bíblia Visual v1
+/* Plaquinha de música e redes do HUD — TIL JHIN · Forja (moldura 9-slice)
    Fonte do OBS separada (o StreamElements não consegue ler o SMTC-Bridge).
-   Fica EM CIMA do HUD, encaixada nele: as duas formam uma caixa só
-   (topo arredondado aqui, base reta; o HUD continua reto e fecha com os cantos cortados).
-   Moldura: ouro antigo > carvão > fio na cor do jogo > placa. Cinzel = rótulos · Montserrat = texto. */
+   Fica EM CIMA da fila, como uma caixa só dela. Uma cor só (--fogo), igual nos dois jogos.
+   Cinzel = rótulos · Montserrat = texto. */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
-:root{--acc:#e0202a;--w:250px;--h:84px;--top:40px;--right:26px;--pad:12px;--orn:58px;--crest:124px;
-  --cv:#0B0604;--pl:#1A0F0B;--be:#3E0701;--vb:#670600;--lv:#E3502A;--ou:#E3A059;--cr:#F7C57B;--cl:#FBD491;--ts:#B8A598}
+:root{--fogo:#E8502A;--w:250px;--h:84px;--top:40px;--right:26px;--pad:10px;--crest:124px;--c:31px;
+  --cv:#0B0604;--vb:#670600;--lv:#E3502A;--ou:#E3A059;--cr:#F7C57B;--cl:#FBD491;--ts:#B8A598}
 
 #pl{position:absolute;top:var(--top);right:var(--right);width:var(--w);height:var(--h);font-family:'Montserrat',sans-serif;font-weight:500;color:var(--cr);
-  filter:drop-shadow(0 0 6px color-mix(in srgb,var(--acc) 40%,transparent)) drop-shadow(0 8px 14px rgba(0,0,0,.7))}
-.panel{position:absolute;inset:0;border-radius:16px 16px 0 0;background:linear-gradient(180deg,#f2bd7c 0%,var(--ou) 30%,#8f5a2b 72%,var(--ou) 100%)}
-.panel::before{content:"";position:absolute;inset:1.5px;border-radius:14.5px 14.5px 0 0;background:var(--cv)}
-.panel::after{content:"";position:absolute;inset:4px;border-radius:12px 12px 0 0;background:var(--acc)}
-.miolo{position:absolute;inset:5px;z-index:1;border-radius:11px 11px 0 0;background:radial-gradient(120% 90% at 50% 0%,var(--pl) 0%,var(--cv) 85%);box-shadow:inset 0 0 16px rgba(0,0,0,.85)}
+  filter:drop-shadow(0 0 6px color-mix(in srgb,var(--fogo) 40%,transparent)) drop-shadow(0 8px 14px rgba(0,0,0,.7))}
 
-/* as duas faixas ocupam o mesmo lugar e trocam com fade (--pad = espaço do brasão em cima) */
-.faixa{position:absolute;inset:calc(5px + var(--pad)) 5px 5px;z-index:1;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease}
+/* MOLDURA: a arte estica; o brilho de lava pulsa devagar por dentro */
+.moldura{position:absolute;inset:0;pointer-events:none;border:var(--c) solid transparent;border-image:url("forja_placa.webp") 92 fill / var(--c) stretch}
+.lava{position:absolute;inset:12px;pointer-events:none;mix-blend-mode:screen;opacity:0;
+  background:radial-gradient(90% 130% at 50% 110%,rgba(232,80,42,.38),transparent 70%);animation:pulso 4.2s ease-in-out infinite}
+
+/* as duas faixas ocupam o mesmo lugar e trocam com fade (--pad = espaço da coroa em cima) */
+.faixa{position:absolute;inset:calc(14px + var(--pad)) 20px 12px;z-index:1;display:flex;flex-direction:column;justify-content:center;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease}
 .faixa.on{opacity:1;transform:none}
 
 /* MÚSICA */
-.np-row{display:flex;align-items:center;gap:9px;padding:0 10px}
-.np-art{flex-shrink:0;width:38px;height:38px;padding:2px;border-radius:8px;background:var(--vb);border:1px solid var(--ou)}
+.np-row{display:flex;align-items:center;gap:9px}
+.np-art{flex-shrink:0;width:36px;height:36px;padding:2px;border-radius:7px;background:var(--vb);border:1px solid var(--ou)}
 .np-art img{width:100%;height:100%;object-fit:cover;display:block;border-radius:5px;filter:saturate(.9) contrast(1.05)}
 .np-txt{flex:1;min-width:0;line-height:1.2}
-.np-title{font-weight:700;font-size:13.5px;color:var(--cl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000}
-.np-artist{font-size:11.5px;color:var(--ts);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-title{font-weight:700;font-size:13px;color:var(--cl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000}
+.np-artist{font-size:11px;color:var(--ts);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .np-eq{display:flex;align-items:flex-end;gap:2px;height:14px;flex-shrink:0}
-.np-eq span{width:3px;height:100%;border-radius:1px;background:var(--acc);transform-origin:bottom;animation:eq 1s ease-in-out infinite}
+.np-eq span{width:3px;height:100%;border-radius:1px;background:var(--fogo);transform-origin:bottom;animation:eq 1s ease-in-out infinite}
 .np-eq span:nth-child(2){animation-duration:.8s;animation-delay:-.3s}
 .np-eq span:nth-child(3){animation-duration:1.15s;animation-delay:-.6s}
 .np-eq span:nth-child(4){animation-duration:.9s;animation-delay:-.15s}
-.np-bar{height:3px;margin:6px 10px 0;background:var(--be);border-radius:999px;overflow:hidden}
-.np-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--acc) 55%,#000),var(--acc));transition:width .5s linear}
+.np-bar{height:3px;margin:5px 0 0;background:var(--vb);border-radius:999px;overflow:hidden}
+.np-fill{height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--fogo) 55%,#000),var(--fogo));transition:width .5s linear}
 .troca .np-art{animation:npTroca .7s ease-out}
 
 /* REDES */
-.rd-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px}
+.rd-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .rd-txt{display:flex;flex-direction:column;line-height:1.1;min-width:0}
 .rd-lbl{font-family:'Cinzel',Georgia,serif;font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ou);white-space:nowrap}
 .rd-lbl:empty{display:none}
 .rd-at{margin-top:3px;font-weight:800;font-size:17px;letter-spacing:.5px;color:var(--cl);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 2px 0 #000}
-.rd-at b{color:var(--acc)}
+.rd-at b{color:var(--fogo)}
 .rd-ico{display:flex;gap:4px;flex-shrink:0}
 .rd-ico svg{width:19px;height:19px;fill:var(--cr);filter:drop-shadow(0 1px 1px #000)}
 .entra .rd-ico svg{animation:rdPop .5s cubic-bezier(.2,.9,.3,1.3) .2s backwards}
@@ -56,15 +56,11 @@ html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
 .entra .rd-ico svg:nth-child(3){animation-delay:.4s}
 .entra .rd-ico svg:nth-child(4){animation-delay:.5s}
 
-/* ORNAMENTOS: brasão do bigode no meio (e arabescos nos cantos, se ligados nas configurações).
-   Ficam sempre nas cores da marca (não mudam com o jogo). */
-.orn{position:absolute;z-index:3;pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
-.orn-tl,.orn-tr{width:var(--orn);top:calc(var(--orn) * -0.2)}
-.orn-tl{left:calc(var(--orn) * -0.2)}
-.orn-tr{right:calc(var(--orn) * -0.2);transform:scaleX(-1)}
-.orn-crest{width:var(--crest);left:50%;top:0;transform:translate(-50%,-62%)}
+/* COROA do bigode no topo (por cima da moldura) */
+.coroa{position:absolute;z-index:3;width:var(--crest);left:50%;top:0;transform:translate(-50%,-52%);pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
 
 .hidden{display:none!important}
+@keyframes pulso{0%,100%{opacity:.15}50%{opacity:.6}}
 @keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
 @keyframes rdPop{0%{opacity:0;transform:scale(.3) translateY(6px)}100%{opacity:1;transform:none}}
 @keyframes npTroca{0%{transform:scale(.8);filter:brightness(2)}100%{transform:scale(1);filter:brightness(1)}}
@@ -72,7 +68,8 @@ html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
 </head>
 <body>
 <div id="pl">
-  <div class="panel"><div class="miolo"></div></div>
+  <div class="moldura"></div>
+  <div class="lava"></div>
 
   <div id="np" class="faixa">
     <div class="np-row">
@@ -96,9 +93,7 @@ html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
     </div>
   </div>
 
-  <img id="ornTL" class="orn orn-tl hidden" alt="">
-  <img id="ornTR" class="orn orn-tr hidden" alt="">
-  <img id="ornCrest" class="orn orn-crest hidden" alt="">
+  <img class="coroa" src="forja_coroa.webp" alt="">
 </div>
 
 <script>
@@ -109,23 +104,13 @@ html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
    =================================================== */
 
 // Posição e tamanho na tela (px), com a fonte do OBS em 1920x1080
-// Fica EM CIMA do HUD. Mudou ALTURA ou POS_TOPO? No HUD, POS_TOPO = POS_TOPO daqui + ALTURA + 4
-const LARGURA     = 250;  // igual à LARGURA do HUD
+// Fica EM CIMA da fila. Mudou ALTURA ou POS_TOPO? Na fila, POS_TOPO = POS_TOPO daqui + ALTURA + 4
+const LARGURA     = 250;  // igual à LARGURA da fila
 const ALTURA      = 84;
-const POS_TOPO    = 40;   // 40 deixa espaço para o brasão
-const POS_DIREITA = 26;   // igual à POS_DIREITA do HUD
-const ESPACO_BRASAO = 10; // espaço em cima, para o brasão não cobrir o nome da música
-
-// Cores de cada jogo (iguais às do HUD)
-const COR_DBD  = '#e0202a';
-const COR_OVER = '#8B3DFF';
-
-// Ornamentos: arabesco do canto e brasão do bigode (Bíblia Visual), salvos no GitHub junto desta página
-// (nome do arquivo no repositório, ou um link completo) · '' = sem ornamento
-const ORN_BRASAO = 'tj_brasao.png';
-const ORN_CANTO  = '';   // arabesco dos cantos desligado · para voltar: 'tj_canto.png'
-const BRASAO_LARGURA = 124;
-const CANTO_LARGURA  = 58;
+const POS_TOPO    = 40;   // 40 deixa espaço para a coroa
+const POS_DIREITA = 26;   // igual à POS_DIREITA da fila
+const ESPACO_COROA = 10;  // espaço em cima, para a coroa não cobrir o nome da música
+const COROA_LARGURA = 124;
 
 // Música (SMTC-Bridge do Nutty, no PC streamer)
 const BRIDGE_URL = 'http://127.0.0.1:5000/now-playing';
@@ -139,11 +124,6 @@ const REDES        = ['youtube', 'kick', 'tiktok', 'twitch'];
 const SEG_MUSICA   = 40;  // com música: música na tela por X s...
 const SEG_REDES    = 12;  // ...e depois as redes por Y s, e repete
 
-// Cor do jogo: escuta o chat da Twitch (só você e os mods), os mesmos comandos do HUD
-const CANAL_TWITCH = 'tiljhin';  // '' = não escuta o chat e fica sempre na cor do DBD
-const CMD_DBD      = '!ctadbd';
-const CMD_OVER     = '!ctaover';
-
 /* =================================================== */
 
 const $ = id => document.getElementById(id);
@@ -152,59 +132,14 @@ const num = (v, d) => { const n = parseFloat(v); return isNaN(n) ? d : n; };
 const html = s => (s || '').toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const TESTE = new URLSearchParams(location.search).has('teste');  // ?teste mostra uma música de mentira
 
-/* ---------- POSIÇÃO E ORNAMENTOS ---------- */
+/* ---------- POSIÇÃO ---------- */
 const r = document.documentElement.style;
 r.setProperty('--w', LARGURA + 'px');
 r.setProperty('--h', ALTURA + 'px');
 r.setProperty('--top', POS_TOPO + 'px');
 r.setProperty('--right', POS_DIREITA + 'px');
-r.setProperty('--pad', ESPACO_BRASAO + 'px');
-r.setProperty('--crest', BRASAO_LARGURA + 'px');
-r.setProperty('--orn', CANTO_LARGURA + 'px');
-[['ornTL', ORN_CANTO], ['ornTR', ORN_CANTO], ['ornCrest', ORN_BRASAO]].forEach(([id, src]) => {
-  if (!src) return;
-  const img = $(id);
-  img.onerror = () => img.classList.add('hidden');  // imagem não achada: some, sem ícone quebrado
-  img.onload = () => img.classList.remove('hidden');
-  img.src = src;
-});
-
-/* ---------- COR DO JOGO ---------- */
-let modo = 'killer';
-try { modo = localStorage.getItem('hudMusicaModo') || 'killer'; } catch (e) {}
-function setModo(m) {
-  modo = m;
-  try { localStorage.setItem('hudMusicaModo', m); } catch (e) {}
-  r.setProperty('--acc', m === 'heroi' ? COR_OVER : COR_DBD);
-}
-setModo(modo);
-
-// leitura anônima do chat da Twitch, só para os comandos de cor
-function conectarChat() {
-  if (!CANAL_TWITCH) return;
-  const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
-  ws.onopen = () => {
-    ws.send('CAP REQ :twitch.tv/tags');
-    ws.send('PASS SCHMOOPIIE');
-    ws.send('NICK justinfan' + Math.floor(10000 + Math.random() * 80000));
-    ws.send('JOIN #' + CANAL_TWITCH.toLowerCase());
-  };
-  ws.onmessage = e => {
-    String(e.data).split('\r\n').forEach(linha => {
-      if (linha.startsWith('PING')) return ws.send('PONG :tmi.twitch.tv');
-      const m = linha.match(/^@(\S+) :\S+ PRIVMSG #\S+ :(.*)$/);
-      if (!m) return;
-      const tags = m[1];
-      const staff = /badges=[^;]*(broadcaster|moderator)/.test(tags) || /(^|;)mod=1(;|$)/.test(tags);
-      if (!staff) return;
-      const cmd = norm(m[2]).split(/\s+/)[0];
-      if (cmd === norm(CMD_DBD)) setModo('killer');
-      if (cmd === norm(CMD_OVER)) setModo('heroi');
-    });
-  };
-  ws.onclose = () => setTimeout(conectarChat, 5000);
-}
-conectarChat();
+r.setProperty('--pad', ESPACO_COROA + 'px');
+r.setProperty('--crest', COROA_LARGURA + 'px');
 
 /* ---------- MÚSICA TOCANDO (SMTC-Bridge) ---------- */
 const NP = { titulo: '', artista: '', pos: 0, fim: 0, em: 0, tocando: false, falhas: 0 };
