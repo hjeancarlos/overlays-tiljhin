@@ -64,7 +64,7 @@ html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
 @keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
 @keyframes rdPop{0%{opacity:0;transform:scale(.3) translateY(6px)}100%{opacity:1;transform:none}}
 @keyframes npTroca{0%{transform:scale(.8);filter:brightness(2)}100%{transform:scale(1);filter:brightness(1)}}
-/* ===== TEMA VELHO OESTE (RDR2) =====  ligado por TEMA = 'rdr2' (ou ?tema=rdr2 no link). Sem isso, fica a Forja. */
+/* ===== TEMA VELHO OESTE (RDR2) =====  ligado quando o tema do HUD (Supabase) é 'rdr2'. Sem isso, fica a Forja. */
 #pl.rdr2{--fogo:#B8823A;--lantern:#E8641B;--c:24px;--vb:#3B2416;--ou:#B8823A;--cr:#D9C18C;--cl:#EAD9B0;--ts:#A89674;
   font-family:'Special Elite','Courier New',monospace;font-weight:400;
   filter:drop-shadow(0 0 6px rgba(232,100,27,.28)) drop-shadow(0 8px 14px rgba(0,0,0,.7))}
@@ -131,8 +131,13 @@ const POS_DIREITA = 26;   // igual à POS_DIREITA da fila
 const ESPACO_COROA = 10;  // espaço em cima, para a coroa não cobrir o nome da música
 const COROA_LARGURA = 124;
 
-// Tema: 'rdr2' (Velho Oeste) ou 'forja'. Dá para trocar sem mexer aqui: ?tema=forja no fim do link do OBS
-const TEMA = new URLSearchParams(location.search).get('tema') || 'rdr2';
+// Tema: 'rdr2' (Velho Oeste) ou 'forja'
+// Normalmente segue o tema escolhido no painel do HUD (lido do Supabase). ?tema=forja no link do OBS força um tema.
+const TEMA_FORCADO = new URLSearchParams(location.search).get('tema');
+const TEMA_PADRAO  = 'rdr2';   // vale enquanto o Supabase não responde
+const TEMA_SEG     = 15;       // confere o tema a cada X segundos
+const TEMA_URL     = 'https://fglwlmuyfojabpilhcdc.supabase.co';
+const TEMA_KEY     = 'sb_publishable_ZsrsSUmFlaPBKu_OeTGbMQ_zFKihTo4';  // chave pública (só leitura)
 
 // Música (SMTC-Bridge do Nutty, no PC streamer)
 const BRIDGE_URL = 'http://127.0.0.1:5000/now-playing';
@@ -155,7 +160,22 @@ const html = s => (s || '').toString().replace(/[&<>"']/g, c => ({ '&': '&amp;',
 const TESTE = new URLSearchParams(location.search).has('teste');  // ?teste mostra uma música de mentira
 
 /* ---------- TEMA ---------- */
-$('pl').classList.toggle('rdr2', TEMA === 'rdr2');
+function aplicarTema(t) {
+  $('pl').classList.toggle('rdr2', t === 'rdr2');
+  $('pl').style.visibility = 'visible';
+}
+async function lerTema() {
+  if (TEMA_FORCADO) return;
+  try {
+    const r = await fetch(TEMA_URL + '/rest/v1/tracker?id=eq.tema&select=data', { headers: { apikey: TEMA_KEY }, cache: 'no-store' });
+    const l = await r.json();
+    const t = l && l[0] && l[0].data && l[0].data.tema;
+    if (t) aplicarTema(String(t));
+  } catch (e) { /* sem rede: fica no tema que já está */ }
+}
+$('pl').style.visibility = 'hidden';                       // não pisca o tema errado antes de saber qual é
+aplicarTema(TEMA_FORCADO || TEMA_PADRAO);
+if (!TEMA_FORCADO) { $('pl').style.visibility = 'hidden'; lerTema(); setTimeout(() => { $('pl').style.visibility = 'visible'; }, 2500); setInterval(lerTema, TEMA_SEG * 1000); }
 
 /* ---------- POSIÇÃO ---------- */
 const r = document.documentElement.style;
