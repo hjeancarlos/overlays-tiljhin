@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>HUD · Música e redes</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@500;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@500;700;800&family=Sancreek&family=Special+Elite&display=swap">
 <style>
-/* Plaquinha de música e redes do HUD — TIL JHIN · Forja (moldura 9-slice)
+/* Plaquinha de música e redes do HUD — TIL JHIN · Forja ou Velho Oeste (moldura 9-slice)
    Fonte do OBS separada (o StreamElements não consegue ler o SMTC-Bridge).
    Fica EM CIMA da fila, como uma caixa só dela. Uma cor só (--fogo = lava #E3502A), igual nos dois jogos.
    Cinzel = rótulos · Montserrat = texto. */
@@ -64,6 +64,24 @@ html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
 @keyframes eq{0%,100%{transform:scaleY(.25)}50%{transform:scaleY(1)}}
 @keyframes rdPop{0%{opacity:0;transform:scale(.3) translateY(6px)}100%{opacity:1;transform:none}}
 @keyframes npTroca{0%{transform:scale(.8);filter:brightness(2)}100%{transform:scale(1);filter:brightness(1)}}
+/* ===== TEMA VELHO OESTE (RDR2) =====  ligado por TEMA = 'rdr2' (ou ?tema=rdr2 no link). Sem isso, fica a Forja. */
+#pl.rdr2{--fogo:#B8823A;--lantern:#E8641B;--c:24px;--vb:#3B2416;--ou:#B8823A;--cr:#D9C18C;--cl:#EAD9B0;--ts:#A89674;
+  font-family:'Special Elite','Courier New',monospace;font-weight:400;
+  filter:drop-shadow(0 0 6px rgba(232,100,27,.28)) drop-shadow(0 8px 14px rgba(0,0,0,.7))}
+#pl.rdr2 .moldura{border-image:url("rdr2-moldura-fila.webp") 92 fill / var(--c) var(--c) 0 stretch}
+#pl.rdr2 .lava{background:radial-gradient(90% 130% at 50% 110%,rgba(232,100,27,.34),transparent 70%);animation:lanterna 3.6s ease-in-out infinite}
+#pl.rdr2 .np-title{font-weight:400;font-size:13px;letter-spacing:.2px}
+#pl.rdr2 .np-art{background:#14100D;border-color:#B8823A;border-radius:3px}
+#pl.rdr2 .np-art img{border-radius:2px;filter:sepia(.35) saturate(.85) contrast(1.05)}
+#pl.rdr2 .np-bar{background:#14100D;border:1px solid #3B2416;height:4px;border-radius:1px}
+#pl.rdr2 .np-fill{border-radius:0;background:linear-gradient(90deg,#7A1F16,#B8823A)}
+#pl.rdr2 .rd-lbl{font-family:'Sancreek',Georgia,serif;font-weight:400;font-size:10px;letter-spacing:.8px}
+#pl.rdr2 .rd-at{font-family:'Sancreek',Georgia,serif;font-weight:400;font-size:16px;letter-spacing:.4px}
+#pl.rdr2 .rd-at b{color:#B8823A}
+#pl.rdr2 .coroa{display:none}
+.estrela{display:none;position:absolute;z-index:3;width:56px;left:50%;top:0;transform:translate(-50%,-52%);pointer-events:none;filter:drop-shadow(0 2px 3px rgba(0,0,0,.7))}
+#pl.rdr2 .estrela{display:block}
+@keyframes lanterna{0%,100%{opacity:.18}22%{opacity:.5}41%{opacity:.3}63%{opacity:.62}82%{opacity:.35}}
 </style>
 </head>
 <body>
@@ -94,6 +112,7 @@ html,body{background:transparent;overflow:hidden;width:1920px;height:1080px}
   </div>
 
   <img class="coroa" src="forja_coroa.webp" alt="">
+  <img class="estrela" src="rdr2-rodape.webp" alt="">
 </div>
 
 <script>
@@ -111,6 +130,9 @@ const POS_TOPO    = 40;   // 40 deixa espaço para a coroa
 const POS_DIREITA = 26;   // igual à POS_DIREITA da fila
 const ESPACO_COROA = 10;  // espaço em cima, para a coroa não cobrir o nome da música
 const COROA_LARGURA = 124;
+
+// Tema: 'rdr2' (Velho Oeste) ou 'forja'. Dá para trocar sem mexer aqui: ?tema=forja no fim do link do OBS
+const TEMA = new URLSearchParams(location.search).get('tema') || 'rdr2';
 
 // Música (SMTC-Bridge do Nutty, no PC streamer)
 const BRIDGE_URL = 'http://127.0.0.1:5000/now-playing';
@@ -131,6 +153,9 @@ const norm = s => (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]
 const num = (v, d) => { const n = parseFloat(v); return isNaN(n) ? d : n; };
 const html = s => (s || '').toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const TESTE = new URLSearchParams(location.search).has('teste');  // ?teste mostra uma música de mentira
+
+/* ---------- TEMA ---------- */
+$('pl').classList.toggle('rdr2', TEMA === 'rdr2');
 
 /* ---------- POSIÇÃO ---------- */
 const r = document.documentElement.style;
